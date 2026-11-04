@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Cost column on Operations -->
+    <record id="view_picking_form_cost" model="ir.ui.view">
+        <field name="name">stock.picking.form.cost</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/list/field[@name='product_uom'][last()]" position="after">
+                <field name="sales_price" optional="hide" readonly="1"/>
+                <field name="cost" string="Cost" readonly="1" optional="show" sum="Total Cost"/>
+            </xpath>
+
+            <!-- Done state: Print opens Store Issue Voucher -->
+            <xpath expr="//button[@name='%(stock.action_report_delivery)d']" position="attributes">
+                <attribute name="name">%(internal_transfer.action_report_store_issue_voucher)d</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

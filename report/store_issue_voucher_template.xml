@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_store_issue_voucher">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-family: DejaVu Sans, Arial, sans-serif; color: #000; font-size: 13px;">
+
+                        <!-- Company Name Header -->
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0; padding: 0; font-size: 22px; font-weight: bold; color: #000;">
+                                <span t-field="o.company_id.name"/>
+                            </h2>
+                        </div>
+
+                        <!-- Date top-right -->
+                        <div style="text-align: right; margin-bottom: 18px;">
+                            Date
+                            <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 140px; margin-left: 6px; text-align: left; padding-left: 4px;">
+                                <t t-if="o.date_done">
+                                    <span t-field="o.date_done" t-options="{'widget': 'date'}"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-field="o.scheduled_date" t-options="{'widget': 'date'}"/>
+                                </t>
+                            </span>
+                        </div>
+
+                        <!-- Title + voucher number -->
+                        <table style="width: 100%; border: none; margin-bottom: 20px;">
+                            <tr>
+                                <td style="width: 18%; border: none;">&#160;</td>
+                                <td style="width: 54%; border: none; text-align: center; vertical-align: middle;">
+                                    <div style="font-size: 20px; font-weight: bold; text-decoration: underline; letter-spacing: 0.5px;">
+                                        STORE ISSUE VOUCHER
+                                    </div>
+                                </td>
+                                <td style="width: 28%; border: none; text-align: right; vertical-align: middle;">
+                                    <span style="font-size: 16px; font-weight: bold; color: #c0392b;">
+                                        No. <span t-field="o.name"/>
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Requisition / Dept -->
+                        <div style="margin-bottom: 8px;">
+                            Requistion No.
+                            <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 260px; margin-left: 8px; padding-left: 4px;"
+                                  t-esc="o.origin or ''"/>
+                        </div>
+                        <div style="margin-bottom: 18px;">
+                            Dept./Section
+                            <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 260px; margin-left: 8px; padding-left: 4px;"
+                                  t-esc="o.location_dest_id.display_name or ''"/>
+                        </div>
+
+                        <!-- Main table: No | Description | Uom | Qty. | Cost | Total Amount | Remark -->
+                        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                            <thead>
+                                <tr>
+                                    <th style="border: 1px solid #000; padding: 5px 3px; text-align: center; width: 5%;">No</th>
+                                    <th style="border: 1px solid #000; padding: 5px 3px; text-align: center; width: 30%;">Description</th>
+                                    <th style="border: 1px solid #000; padding: 5px 3px; text-align: center; width: 8%;">Uom</th>
+                                    <th style="border: 1px solid #000; padding: 5px 3px; text-align: center; width: 10%;">Qty.</th>
+                                    <th style="border: 1px solid #000; padding: 5px 3px; text-align: center; width: 12%;">Cost</th>
+                                    <th style="border: 1px solid #000; padding: 5px 3px; text-align: center; width: 18%;">Total Amount</th>
+                                    <th style="border: 1px solid #000; padding: 5px 3px; text-align: center; width: 17%;">Remark</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_no" t-value="0"/>
+                                <t t-set="grand_total" t-value="0.0"/>
+                                <t t-foreach="o.move_ids_without_package" t-as="move">
+                                    <t t-set="line_no" t-value="line_no + 1"/>
+                                    <t t-set="line_qty" t-value="move.product_uom_qty"/>
+                                    <t t-set="unit_cost" t-value="move.product_id.list_price or 0.0"/>
+                                    <t t-set="line_total" t-value="line_qty * unit_cost"/>
+                                    <t t-set="grand_total" t-value="grand_total + line_total"/>
+                                    <tr>
+                                        <td style="border: 1px solid #000; padding: 5px 3px; text-align: center; height: 26px;">
+                                            <span t-esc="line_no"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 5px 3px;">
+                                            <span t-field="move.product_id.display_name"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 5px 3px; text-align: center;">
+                                            <span t-field="move.product_uom"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 5px 3px; text-align: right;">
+                                            <span t-esc="line_qty" t-options="{'widget': 'float', 'precision': 2}"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 5px 3px; text-align: right;">
+                                            <span t-esc="unit_cost" t-options="{'widget': 'float', 'precision': 2}"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 5px 3px; text-align: right;">
+                                            <span t-esc="line_total" t-options="{'widget': 'float', 'precision': 2}"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 5px 3px;">
+                                            <span t-esc="move.description_picking or ''"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <!-- Pad empty rows like the paper form -->
+                                <t t-set="pad_rows" t-value="[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"/>
+                                <t t-foreach="pad_rows" t-as="pad">
+                                    <t t-if="pad &gt; line_no">
+                                        <tr>
+                                            <td style="border: 1px solid #000; padding: 5px 3px; height: 26px;">&#160;</td>
+                                            <td style="border: 1px solid #000; padding: 5px 3px;">&#160;</td>
+                                            <td style="border: 1px solid #000; padding: 5px 3px;">&#160;</td>
+                                            <td style="border: 1px solid #000; padding: 5px 3px;">&#160;</td>
+                                            <td style="border: 1px solid #000; padding: 5px 3px;">&#160;</td>
+                                            <td style="border: 1px solid #000; padding: 5px 3px;">&#160;</td>
+                                            <td style="border: 1px solid #000; padding: 5px 3px;">&#160;</td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Signature lines (stacked, matching paper form) -->
+                        <div style="margin-top: 36px; line-height: 2.2;">
+                            <div>
+                                Good's delivered by
+                                <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 220px; margin: 0 8px;"/>
+                                Sig.
+                                <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 160px; margin-left: 8px;"/>
+                            </div>
+                            <div>
+                                Good's Received by
+                                <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 220px; margin: 0 8px;"/>
+                                Sig.
+                                <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 160px; margin-left: 8px;"/>
+                            </div>
+                            <div>
+                                Approved
+                                <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 268px; margin: 0 8px;"/>
+                                Sig.
+                                <span style="display: inline-block; border-bottom: 1px dotted #000; min-width: 160px; margin-left: 8px;"/>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
